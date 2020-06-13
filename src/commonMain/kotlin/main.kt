@@ -8,7 +8,7 @@ import kotlin.reflect.*
 suspend fun main() = Korge(config = Korge.Config(module = GameModule))
 
 object GameModule : Module() {
-    override val mainScene: KClass<out Scene> = PongScene::class // FIXME: debug code
+	override val mainScene: KClass<out Scene> = MainScene::class
 
     override val title: String = "The ULTIMATE Classic Game"
     //override val icon: String = "icon.png" TODO design needed at last phase

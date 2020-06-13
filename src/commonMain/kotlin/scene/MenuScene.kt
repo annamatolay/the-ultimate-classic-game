@@ -8,7 +8,6 @@ import utils.*
 
 class MenuScene() : Scene() {
     override suspend fun Container.sceneInit() {
-        addFpsText(views.gameWindow)
 
         textButton(256.0, 32.0) {
             text = "MAIN SCREEN"

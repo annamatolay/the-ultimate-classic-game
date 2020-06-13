@@ -22,10 +22,20 @@ class MainScene : Scene() {
             visible = false
         }
 
-        val character = image(resourcesVfs["character.jpg"].readBitmap()) {
+        val character = image(resourcesVfs["character.png"].readBitmap()) {
             position(150, 400)
             visible = false
         }
+
+//FIXME sprite animation
+
+//        val characterMoveForward = sprite(
+//                SpriteAnimation(resourcesVfs["character_moving_forward.png"].readBitmap(), 40, 150, columns = 5)
+//        ) { position(character.x, character.y) }
+//
+//        val characterMoveBack = sprite(
+//                SpriteAnimation(resourcesVfs["character_moving_back.png"].readBitmap(), 40, 150, columns = 5)
+//        ) { position(character.x, character.y) }
 
         var imageCounter = 0
         addFixedUpdater(1.timesPerSecond) {
@@ -40,16 +50,27 @@ class MainScene : Scene() {
             //println("VIEWS COUNT: ${children.size}\n$children")
         }
 
-        addFpsText(views.gameWindow)
         showMenuListener(sceneContainer)
 
         var characterSpeed = 10
         keys {
             onKeyDown {
+                //FIXME sprite animation
                 when (it.key) {
-                    Key.LEFT -> character.x -= characterSpeed
-                    Key.RIGHT -> character.x += characterSpeed
+                    Key.LEFT -> {
+                        character.x -= characterSpeed
+//                        characterMoveForward.playAnimationLooped()
+//                        println(characterMoveForward.spriteDisplayTime)
+//                        characterMoveBack.stopAnimation()
+                    }
+                    Key.RIGHT -> {
+                        character.x += characterSpeed
+//                        characterMoveBack.playAnimationLooped()
+//                        characterMoveBack.stopAnimation()
+                    }
                     else -> {
+//                        characterMoveBack.stopAnimation()
+//                        characterMoveBack.stopAnimation()
                     }
                 }
             }
