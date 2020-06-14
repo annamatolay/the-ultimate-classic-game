@@ -1,33 +1,50 @@
 package scene
 
 import com.soywiz.klock.*
-import com.soywiz.korau.sound.*
 import com.soywiz.korev.*
+import com.soywiz.korev.DummyEventDispatcher.addEventListener
 import com.soywiz.korge.input.*
 import com.soywiz.korge.scene.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.format.*
-import com.soywiz.korio.file.*
 import com.soywiz.korio.file.std.*
 import utils.*
 
 class MainScene : Scene() {
+    private val charStartPosX = 255
+    private val charMaxPosX = charStartPosX + 660
+    private val charStartPosY = 390
 
     override suspend fun Container.sceneInit() {
+        showMenuListener(sceneContainer)
 
-        (0..6).forEach { createNextHeadImage(it) }
+        val centerX = views.actualVirtualWidth / 2
+        val centerY = views.actualVirtualHeight / 2
 
-        val door1 = image(resourcesVfs["door_1.png"].readBitmap()) {
-            position(300, 400)
-            visible = false
+        image(resourcesVfs["bg_varia.png"].readBitmap())
+        val co = image(resourcesVfs["character/head_closed.png"].readBitmap()) { visible = false }
+        val ho = image(resourcesVfs["character/head_opened.png"].readBitmap()) { visible = true }
+
+        val door2 = sprite(SpriteAnimation(
+                resourcesVfs["doors/door2.png"].readBitmap(),
+                223,
+                200,
+                columns = 5
+        )) {
+            position(centerX - 115, charStartPosY - 50)
+        }.playAnimation(spriteDisplayTime = 0.08.seconds)
+
+        //40x150
+        val character = image(resourcesVfs["character/character.png"].readBitmap()) {
+            position(charStartPosX, charStartPosY)
+            visible = true
         }
 
-        val character = image(resourcesVfs["character.png"].readBitmap()) {
-            position(150, 400)
-            visible = false
-        }
+        /**
+         * Character moving
+         */
 
-//FIXME sprite animation
+        //FIXME sprite animation
 
 //        val characterMoveForward = sprite(
 //                SpriteAnimation(resourcesVfs["character_moving_forward.png"].readBitmap(), 40, 150, columns = 5)
@@ -37,34 +54,19 @@ class MainScene : Scene() {
 //                SpriteAnimation(resourcesVfs["character_moving_back.png"].readBitmap(), 40, 150, columns = 5)
 //        ) { position(character.x, character.y) }
 
-        var imageCounter = 0
-        addFixedUpdater(1.timesPerSecond) {
-            if (imageCounter < 6) {
-                getChildAt(imageCounter++).visible = false
-                getChildAt(imageCounter).visible = true
-            } else {
-                character.visible = door1.visible
-                door1.visible = true
-            }
-
-            //println("VIEWS COUNT: ${children.size}\n$children")
-        }
-
-        showMenuListener(sceneContainer)
-
-        var characterSpeed = 10
+        val characterSpeed = 30
         keys {
             onKeyDown {
                 //FIXME sprite animation
                 when (it.key) {
                     Key.LEFT -> {
-                        character.x -= characterSpeed
+                        if (character.x > charStartPosX) character.x -= characterSpeed
 //                        characterMoveForward.playAnimationLooped()
 //                        println(characterMoveForward.spriteDisplayTime)
 //                        characterMoveBack.stopAnimation()
                     }
                     Key.RIGHT -> {
-                        character.x += characterSpeed
+                        if (character.x < charMaxPosX) character.x += characterSpeed
 //                        characterMoveBack.playAnimationLooped()
 //                        characterMoveBack.stopAnimation()
                     }
@@ -76,13 +78,6 @@ class MainScene : Scene() {
             }
         }
 
-        character.onCollision({ it == door1 }) { sceneContainer.changeToAsync<PongScene>() }
+//        character.onCollision({ it == door1 }) { sceneContainer.changeToAsync<PongScene>() } FIXME
     }
-
-    private suspend fun Container.createNextHeadImage(index: Int = 0) =
-            image(resourcesVfs["head_draft/${if (index == 0) "big_head_closed" else "big_head_open_$index"}.png"].readBitmap()) {
-                position(0, 0)
-                scale(.6)
-                if (index > 0) visible = false
-            }
 }
