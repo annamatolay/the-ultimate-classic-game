@@ -9,12 +9,15 @@ class GameBall(
         private val ballPosYAtStart: Double = .0,
         private val gameState: GameState = GameState.Paused(),
         private val onGameRunning: () -> Unit,
-        private val onGamePaused: () -> Unit = {},
-        private val defaultAngle: Double = Random.nextDouble() * 2 * PI // TODO: check
+        private val onGamePaused: () -> Unit = {}
+//        private val defaultAngle: Double = Random.nextDouble() * 2 * PI // TODO: check
 ) {
-    private val radius = 10.0
-    private val speedIncrease = 50.0 // TODO: check
-    private val defaultSpeed = 200.0
+     companion object {
+         const val radius = 10.0
+         const val speedIncrease = 50.0 // TODO: check for PONG
+         const val defaultSpeed = 200.0
+         val defaultAngle: Double = Random.nextDouble() * 2 * PI
+     }
     private var currentSpeed = defaultSpeed
 
     fun Container.init() =
