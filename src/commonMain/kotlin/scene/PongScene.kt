@@ -1,16 +1,19 @@
 package scene
 
 import com.soywiz.klock.TimeSpan
-import com.soywiz.korev.*
-import com.soywiz.korge.input.*
-import com.soywiz.korge.scene.*
+import com.soywiz.korev.Key
+import com.soywiz.korge.input.keys
+import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.view.*
-import com.soywiz.korim.color.*
+import com.soywiz.korim.color.Colors
 import pong.Ball
 import pong.Paddle
-import utils.*
-import kotlin.math.*
-import kotlin.random.*
+import utils.addFpsText
+import utils.showMenuListener
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.random.Random
 
 class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Paddle) : Scene() {
 
@@ -22,8 +25,8 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
 
     private var playState: PongGameStates = PongGameStates.Starting
     private val ball = Ball()
-    private var scoreLeft = 0
-    private var scoreRight = 0
+    private var leftPlayerScore = 0
+    private var rightPlayerScore = 0
 
     private var paddlePosYAtStart: Double = 0.0
     private var ballPosXAtStart: Double = 0.0
@@ -40,20 +43,25 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
         addFpsText(views.gameWindow)
         showMenuListener(sceneContainer)
 
-        // FIXME: this doesn't appear on screen for some reason
         text("") {
             position(10, 100)
             addUpdater {
-                visible = (playState is PongGameStates.Starting)
-
-                //TODO: change it when story time
-                if (playState == PongGameStates.Starting) {
-                    text = "Welcome to the PONG Game!\n\n" +
-                            "-- To move the your Paddle, use the keys [W] and [S] or UP] and [DOWN].\n\n" +
-                            "-- To open the Menu, use [ESC]\n\n" +
-                            "-- To Start the game, use [SPACE]"
-                } else if (playState == PongGameStates.Scored) {
-                    text = "Press [SPACE] for the next round!"
+                when (playState) {
+                    //TODO: change it when story time
+                    is PongGameStates.Starting -> {
+                        visible = true
+                        text = "Welcome to the PONG Game!\n\n" +
+                                "-- To move the your Paddle, use the keys [W] and [S] or UP] and [DOWN].\n\n" +
+                                "-- To open the Menu, use [ESC]\n\n" +
+                                "-- To Start the game, use [SPACE]"
+                    }
+                    is PongGameStates.Scored -> {
+                        visible = true
+                        text = "Press [SPACE] for the next round!"
+                    }
+                    else -> {
+                        visible = false
+                    }
                 }
             }
         }
@@ -62,13 +70,13 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
         text("0") {
             //            textSize = 24.0
             position(views.actualVirtualWidth / 4, views.actualVirtualHeight / 2)
-            addUpdater { text = scoreLeft.toString() }
+            addUpdater { text = leftPlayerScore.toString() }
         }
 
         // The score of the player on the Right side
         text("0") {
             position(views.actualVirtualWidth * 3 / 4, views.actualVirtualHeight / 2)
-            addUpdater { text = scoreRight.toString() }
+            addUpdater { text = rightPlayerScore.toString() }
         }
 
         // The left paddle controlled by user
@@ -77,9 +85,7 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
             addUpdater { playerPaddleController(views, this, playerPaddle) }
         }
 
-        //TODO: create PRO bot, who always hits back the ball
-
-        // The right paddle controlled by BOT FIXME: dummy bot needs to be polished
+        // The right paddle controlled by computer
         val rightPaddle = solidRect(computerPaddle.width, computerPaddle.height, Colors.BLUE) {
             position(views.actualVirtualWidth - computerPaddle.distanceFromWall - computerPaddle.width, paddlePosYAtStart)
             addUpdater { computerPaddleController(views, this, computerPaddle) }
@@ -105,45 +111,55 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
     }
 
     private fun resetRound(ballCircle: Circle, isInit: Boolean = false) {
-        ballCircle.x = ballPosXAtStart
-        ballCircle.y = ballPosYAtStart
-
+        ball.position.x = ballPosXAtStart
+        ball.position.y = ballPosYAtStart
         ball.speed = ball.initialSpeed
-        ball.angle = Random.nextDouble() * 2 * PI
+        ball.angle = Random.nextDouble(0.4, 0.6) * 2 * PI
 
-        if (!isInit)
+        ballCircle.x = ball.position.x
+        ballCircle.y = ball.position.y
+
+        if (!isInit) {
             playState = PongGameStates.Scored // Game will be paused till players start the next round.
+        }
     }
 
-    private fun ballController(sceneView: Views, timeSpan: TimeSpan, ballCircle: Circle, leftPaddle: View, rightPaddle: View) {
+    private fun ballController(
+            sceneView: Views,
+            timeSpan: TimeSpan,
+            ballCircle: Circle,
+            leftPaddle: View,
+            rightPaddle: View
+    ) {
         if (playState == PongGameStates.Playing) {
-            // Convert the ball's velocity vector (speed, angle) to a point to move to
-            ballCircle.x += ball.speed * cos(ball.angle) * timeSpan.seconds
-            ballCircle.y += ball.speed * sin(ball.angle) * timeSpan.seconds
+            ball.position.x += ball.speed * cos(ball.angle) * timeSpan.seconds
+            ball.position.y += ball.speed * sin(ball.angle) * timeSpan.seconds
+            ballCircle.x = ball.position.x
+            ballCircle.y = ball.position.y
 
-            // if the ball hits the paddles, flip its direction and increase speed
-            if ((ballCircle.x < leftPaddle.x + 10 && ballCircle.y > leftPaddle.y && ballCircle.y < leftPaddle.y + 100) ||
-                    ((ballCircle.x > rightPaddle.x - 20) && (ballCircle.y > rightPaddle.y) && (ballCircle.y < (rightPaddle.y + 100)))) {
+            if (ballCircle.collidesWith(listOf(leftPaddle, rightPaddle))) {
+                // TODO: define max speed for ball?
                 ball.speed += ball.speedIncrement
                 ball.angle = PI - ball.angle
             }
 
-            // If ball hits the walls, flip its direction and increase speed
-            if ((ballCircle.y < 0) || (ballCircle.y > (sceneView.actualVirtualHeight - 20))) {
+            val isWallHit = (ballCircle.y < 0) || (ballCircle.y > (sceneView.actualVirtualHeight - 20))
+            if (isWallHit) {
                 ball.speed += 10
                 ball.angle *= -1
             }
 
-            // If ball goes through the vertical walls/goalpost, handle scoring and reset the round
-            if (ballCircle.x < -20) {
-                /* Reset the Ball */
+            val isLeftPlayerGoal = ballCircle.x > sceneView.actualVirtualWidth
+            val isRightPlayerGoal = ballCircle.x < -20
+
+            if (isLeftPlayerGoal) {
                 resetRound(ballCircle)
-                scoreRight++
-                //scoredYellText.text = "Right SCORED!!!" TODO: figure out when story time
-            } else if (ballCircle.x > sceneView.actualVirtualWidth) {
-                resetRound(ballCircle)
-                scoreLeft++
+                leftPlayerScore++
                 //scoredYellText.text = "Left SCORED!!!" TODO: figure out when story time
+            } else if (isRightPlayerGoal) {
+                resetRound(ballCircle)
+                rightPlayerScore++
+                //scoredYellText.text = "Right SCORED!!!" TODO: figure out when story time
             }
         }
     }
@@ -160,19 +176,25 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
     }
 
     private fun computerPaddleController(sceneView: Views, paddleRectView: View, paddle: Paddle) {
-        var frameCounter = 0
-
         if (playState is PongGameStates.Playing) {
-            ++frameCounter
-            var isGoUp = Random.nextBoolean()
-            if (frameCounter % 10 == 0) {
-                isGoUp = Random.nextBoolean()
-            }
+            val isBallAbovePaddle = ball.position.y < paddleRectView.y
+            val isBallBelowPaddle = ball.position.y > (paddleRectView.y + paddle.height)
 
-            if (isGoUp && (paddleRectView.y > 0)) {
-                paddleRectView.y -= paddle.moveSpeed
-            } else if (!isGoUp && (paddleRectView.y < (sceneView.actualVirtualHeight - paddle.height))) {
-                paddleRectView.y += paddle.moveSpeed
+            val isPadBelowTopWall = paddleRectView.y > 0
+            val isPadAboveBottomWall = (paddleRectView.y < (sceneView.actualVirtualHeight - paddle.height))
+
+            if (isPadBelowTopWall && isPadAboveBottomWall) {
+                if (isBallAbovePaddle) {
+                    paddleRectView.y -= paddle.moveSpeed
+                } else if (isBallBelowPaddle) {
+                    paddleRectView.y += paddle.moveSpeed
+                }
+            } else {
+                if (isPadBelowTopWall) {
+                    paddleRectView.y -= paddle.moveSpeed
+                } else {
+                    paddleRectView.y += paddle.moveSpeed
+                }
             }
         }
     }
