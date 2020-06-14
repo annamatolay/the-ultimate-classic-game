@@ -88,7 +88,7 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
         // The ball
         circle(ball.radius, Colors.WHITE) {
             position(ballPosXAtStart, ballPosYAtStart)
-            resetRound(this)
+            resetRound(this, true)
             addUpdater { timeSpan -> ballController(views, timeSpan, this, leftPaddle, rightPaddle) }
         }
 
@@ -104,14 +104,15 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
         }
     }
 
-    private fun resetRound(ballCircle: Circle) {
+    private fun resetRound(ballCircle: Circle, isInit: Boolean = false) {
         ballCircle.x = ballPosXAtStart
         ballCircle.y = ballPosYAtStart
 
         ball.speed = ball.initialSpeed
         ball.angle = Random.nextDouble() * 2 * PI
 
-        playState = PongGameStates.Scored // Game will be paused till players start the next round.
+        if (!isInit)
+            playState = PongGameStates.Scored // Game will be paused till players start the next round.
     }
 
     private fun ballController(sceneView: Views, timeSpan: TimeSpan, ballCircle: Circle, leftPaddle: View, rightPaddle: View) {
