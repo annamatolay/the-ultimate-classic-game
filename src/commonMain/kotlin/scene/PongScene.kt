@@ -17,7 +17,7 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
     sealed class PongGameStates {
         object Starting : PongGameStates() // The game is just starting and some help text will be shown. Ball will not be moving
         object Playing : PongGameStates()  // In this state the ball will be moving and player can score against the computer
-        object Paused : PongGameStates()   // In this state the game will pause and show that a goal was scored
+        object Scored : PongGameStates()   // In this state the game will pause and show that a goal was scored
     }
 
     private var playState: PongGameStates = PongGameStates.Starting
@@ -52,7 +52,7 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
                             "-- To move the your Paddle, use the keys [W] and [S] or UP] and [DOWN].\n\n" +
                             "-- To open the Menu, use [ESC]\n\n" +
                             "-- To Start the game, use [SPACE]"
-                } else if (playState == PongGameStates.Paused) {
+                } else if (playState == PongGameStates.Scored) {
                     text = "Press [SPACE] for the next round!"
                 }
             }
