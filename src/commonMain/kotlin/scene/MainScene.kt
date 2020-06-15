@@ -1,21 +1,25 @@
 package scene
 
 import com.soywiz.klock.*
+import com.soywiz.korau.sound.*
 import com.soywiz.korev.*
 import com.soywiz.korge.input.*
 import com.soywiz.korge.scene.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.format.*
 import com.soywiz.korio.file.std.*
-import com.soywiz.korio.lang.*
 import utils.*
 
-class MainScene : Scene() {
+class MainScene(private val bgMusic: NativeSound) : Scene() {
     private val charStartPosX = 255
     private val charMaxPosX = charStartPosX + 660
     private val charStartPosY = 390
 
+    private var musicChannel: NativeSoundChannel? = null
+
     override suspend fun Container.sceneInit() {
+        musicChannel = bgMusic.play()
+//        val music = resourcesVfs["music/WHERE IS MY MIND - NIMINO REMIX CAFFEINE BEATS [COPYRIGHT FREE].mp3"].readMusic()
         showMenuListener(sceneContainer)
         image(resourcesVfs["bg_varia.png"].readBitmap())
         val title = image(resourcesVfs["title.png"].readBitmap())
@@ -62,6 +66,39 @@ class MainScene : Scene() {
         val character = image(resourcesVfs["character/character.png"].readBitmap()) {
             position(charStartPosX, charStartPosY)
             visible = false
+
+            addFixedUpdater {
+                keys {
+                    onKeyDown {
+                        if (it.key == Key.SPACE)
+                            when {
+                                collidesWith(door1) -> {
+                                    door1.playAnimation()
+                                    door1.onAnimationCompleted{
+                                        sceneContainer.changeToAsync<PongScene>()
+                                    }
+//                                    musicChannel?.volume = .0
+//                                    music.volume = .0
+                                }
+                                collidesWith(door2) -> {
+                                    door2.playAnimation()
+                                    door2.onAnimationCompleted{
+                                        sceneContainer.changeToAsync<FakeSpaceInvaderScene>()
+                                    }
+                                }
+                                collidesWith(door3) -> sceneContainer.changeToAsync<PacManScene>() // todo
+                            }
+                    }
+                }
+            }
+        }
+
+        /*TODO finish it
+        I just one to show her/him even if the (s)he didn't got the chance to introduce herself/himself
+         */
+        val boss = image(resourcesVfs["character/boss.png"].readBitmap()) {
+            position(charMaxPosX, charStartPosY)
+            visible = false
         }
 
         /**
@@ -75,10 +112,14 @@ class MainScene : Scene() {
                 rows = 3,
                 columns = 5
         ))
-        val instruction = text("PRESS [SPACE] TO CONTINUE").position(10.0, 10.0)
+        val instruction =
+                text("PRESS [SPACE] TO CONTINUE\nAND [ESC] FOR MENU & HELP").position(10.0, 10.0)
         keys {
             onKeyDown {
                 if (it.key == Key.SPACE) {
+//                    musicChannel = music.playForever()
+//                    musicChannel = music.play()
+                    musicChannel?.volume = 1.0
                     title.visible = false
                     instruction.visible = false
                     headSprite.playAnimation(spriteDisplayTime = 0.15.seconds)
@@ -93,6 +134,7 @@ class MainScene : Scene() {
             door2.visible = true
             door3.visible = true
             character.visible = true
+            boss.visible = true
         }
 
         //FIXME chained door animation from open to closed
@@ -155,7 +197,10 @@ class MainScene : Scene() {
                 }
             }
         }
+    }
 
-//        character.onCollision({ it == door1 }) { sceneContainer.changeToAsync<PongScene>() } FIXME
+    override suspend fun sceneBeforeLeaving() {
+        super.sceneBeforeLeaving()
+        musicChannel?.stop()
     }
 }
