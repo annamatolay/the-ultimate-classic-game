@@ -74,7 +74,7 @@ class MainScene(private val bgMusic: NativeSound) : Scene() {
                             when {
                                 collidesWith(door1) -> {
                                     door1.playAnimation()
-                                    door1.onAnimationCompleted{
+                                    door1.onAnimationCompleted {
                                         sceneContainer.changeToAsync<PongScene>()
                                     }
 //                                    musicChannel?.volume = .0
@@ -82,7 +82,7 @@ class MainScene(private val bgMusic: NativeSound) : Scene() {
                                 }
                                 collidesWith(door2) -> {
                                     door2.playAnimation()
-                                    door2.onAnimationCompleted{
+                                    door2.onAnimationCompleted {
                                         sceneContainer.changeToAsync<FakeSpaceInvaderScene>()
                                     }
                                 }
