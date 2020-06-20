@@ -10,7 +10,7 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath("com.soywiz.korlibs.korge.plugins:korge-gradle-plugin:1.13.2.0")
+		classpath("com.soywiz.korlibs.korge.plugins:korge-gradle-plugin:1.13.3.0")
 	}
 }
 
@@ -18,4 +18,5 @@ apply<KorgeGradlePlugin>()
 
 korge {
 	id = "com.palmatolay.game.the-ultimate-classic-game"
+
 }

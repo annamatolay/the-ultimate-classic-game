@@ -22,7 +22,7 @@ class MenuScene() : Scene() {
             text = "MAIN SCREEN"
             position(views.actualVirtualWidth / 2 - 128, views.actualVirtualHeight / 2 - 64)
             onClick {
-                sceneContainer.changeToAsync<MainScene>()
+                sceneContainer.changeToAsync<TestScene>()
             }
         }
 

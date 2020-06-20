@@ -1,7 +1,7 @@
 package model
 
 class Player() : Character() {
-    override val startPosX = 255
-    override val startPosY = 390
-    val maxPosX = startPosX + 660
+    override var x = 255.0
+    override val y = 390.0
+    val maxPosX = x + 660
 }

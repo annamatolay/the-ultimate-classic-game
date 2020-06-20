@@ -12,14 +12,14 @@ import com.soywiz.korio.file.std.*
 import utils.*
 
 // TODO: Delete when interactive Dialogs are ready
-class StoryScene(val music: NativeSound) : Scene() {
+class StoryScene(val music: NativeSound? = null) : Scene() {
     private lateinit var channel: NativeSoundChannel
     private var pageIndex = 1
 
     // FIXME-PLUGIN-FYI: when I create the scene with the IntelliJ option, then I get the method like this:
     // suspend override fun Container.sceneInit() <- WARNING: Non-canonical order
     override suspend fun Container.sceneInit() {
-        channel = music.playForever()
+//        channel = music.playForever()
 
         val pages = listOf(
                 image(resourcesVfs["story/page1.png"].readBitmap()) {
@@ -83,7 +83,7 @@ class StoryScene(val music: NativeSound) : Scene() {
                 }
             }
         }
-        keys { onKeyDown { if (it.key == Key.ESCAPE) sceneContainer.changeToAsync<MainScene>() } }
+        keys { onKeyDown { if (it.key == Key.ESCAPE) sceneContainer.changeToAsync<MenuScene>() } }
     }
 
     override suspend fun sceneBeforeLeaving() {
