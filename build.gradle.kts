@@ -17,6 +17,7 @@ apply<KorgeGradlePlugin>()
 
 korge {
 	id = "com.palmatolay.game.the-ultimate-classic-game"
-	version = "0.0.1-alpha"
-	name = "TheULTIMATEClassicGame"
+//	version = GameConfig.version
+//	name = GameConfig.name
+	gameCategory = GameCategory.ADVENTURE
 }

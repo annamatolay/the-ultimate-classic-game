@@ -7,10 +7,10 @@ import com.soywiz.korge.view.*
 import com.soywiz.korim.color.*
 import utils.*
 
-class MenuScene() : Scene() {
+class MenuScene : Scene() {
     override suspend fun Container.sceneInit() {
 
-        text("Press [SPACE] when you hit one of the door to launch a game.\n\n" +
+        text("Press [ENTER] when you hit one of the door to launch a game.\n\n" +
                 "Press [RIGHT|LEFT] to move.\n\n" +
                 "Have fun and Thanks for playing! <3\n\n\n\n")
                 .position(10.0, 10.0)
@@ -28,7 +28,7 @@ class MenuScene() : Scene() {
             position(views.actualVirtualWidth / 2 - 128, views.actualVirtualHeight / 2 - 192)
             onClick {
                 @Suppress("DeferredResultUnused") //TODO
-                sceneContainer.changeToAsync<TestScene>()
+                sceneContainer.changeToAsync<MainScene2>()
             }
         }
 
