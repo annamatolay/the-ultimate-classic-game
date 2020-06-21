@@ -1,7 +1,6 @@
 import com.soywiz.korge.gradle.*
 
 buildscript {
-	val korgeVersion: String by project
 
 	repositories {
 		mavenLocal()
@@ -18,5 +17,6 @@ apply<KorgeGradlePlugin>()
 
 korge {
 	id = "com.palmatolay.game.the-ultimate-classic-game"
-
+	version = "0.0.1-alpha"
+	name = "TheULTIMATEClassicGame"
 }

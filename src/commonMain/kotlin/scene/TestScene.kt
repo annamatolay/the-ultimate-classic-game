@@ -3,16 +3,14 @@ package scene
 import com.soywiz.klock.*
 import com.soywiz.korev.*
 import com.soywiz.korge.input.*
-import com.soywiz.korge.scene.Scene
+import com.soywiz.korge.scene.*
 import com.soywiz.korge.view.*
-import com.soywiz.korge.view.addFixedUpdater
 import com.soywiz.korim.format.*
 import com.soywiz.korio.file.std.*
 import model.*
 import utils.*
 
-class TestScene(
-) : Scene() {
+class TestScene : Scene() {
     private val player = Player()
     private var isOpened = false
 
@@ -27,9 +25,10 @@ class TestScene(
                 200,
                 columns = 5
         )) {
-            position(views.actualVirtualWidth / 2, player.y - 45)
+            position(views.actualVirtualWidth / 2.0, player.y - 45)
             visible = false
         }
+        @Suppress("DuplicatedCode") //TODO
         val headOpened = image(resourcesVfs["character/head_opened.png"].readBitmap()) { visible = false }
         val headSprite = sprite(SpriteAnimation(
                 resourcesVfs["character/head_sprite_sheet.png"].readBitmap(),
@@ -63,7 +62,10 @@ class TestScene(
                                             collidesWith(door) -> {
                                                 door.playAnimation()
                                                 door.onAnimationCompleted { door.setFrame(0) }
-                                                door.onAnimationCompleted { sceneContainer.changeToAsync<PongScene>() }
+                                                door.onAnimationCompleted {
+                                                    @Suppress("DeferredResultUnused")
+                                                    sceneContainer.changeToAsync<PongScene>()
+                                                }
                                             }
                                         }
                                 }
