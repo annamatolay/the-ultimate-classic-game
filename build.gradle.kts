@@ -1,7 +1,6 @@
 import com.soywiz.korge.gradle.*
 
 buildscript {
-	val korgeVersion: String by project
 
 	repositories {
 		mavenLocal()
@@ -10,7 +9,7 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath("com.soywiz.korlibs.korge.plugins:korge-gradle-plugin:1.13.2.3")
+		classpath("com.soywiz.korlibs.korge.plugins:korge-gradle-plugin:1.13.3.0")
 	}
 }
 
@@ -18,4 +17,7 @@ apply<KorgeGradlePlugin>()
 
 korge {
 	id = "com.palmatolay.game.the-ultimate-classic-game"
+//	version = GameConfig.version
+//	name = GameConfig.name
+	gameCategory = GameCategory.ADVENTURE
 }

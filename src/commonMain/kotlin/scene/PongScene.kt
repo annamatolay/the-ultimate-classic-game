@@ -1,13 +1,14 @@
 package scene
 
 import com.soywiz.klock.TimeSpan
+import com.soywiz.korau.sound.*
 import com.soywiz.korev.Key
 import com.soywiz.korge.input.keys
-import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
-import pong.Ball
-import pong.Paddle
+import com.soywiz.korio.file.std.*
+import model.pong.Ball
+import model.pong.Paddle
 import utils.addFpsText
 import utils.showMenuListener
 import kotlin.math.PI
@@ -15,7 +16,8 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 
-class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Paddle) : Scene() {
+class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Paddle) : BaseScene() {
+
 
     sealed class PongGameStates {
         object Starting : PongGameStates() // The game is just starting and some help text will be shown. Ball will not be moving
@@ -42,6 +44,11 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
         initPongScene(views)
         addFpsText(views.gameWindow)
         showMenuListener(sceneContainer)
+        sounds = listOf(
+                resourcesVfs["music/pong/blip_d.wav"].readSound(),
+                resourcesVfs["music/pong/blup_d.wav"].readSound(),
+                resourcesVfs["music/pong/blap_d.wav"].readSound()
+        )
 
         text("") {
             position(10, 100)
@@ -110,6 +117,34 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
         }
     }
 
+    override suspend fun sceneAfterInit() {
+//        musicSrcTemplates = initMusic()
+        super.sceneAfterInit()
+    }
+
+    private fun initMusic(): List<String> {
+        var templateIndex = ""
+        val musicSrcTemplate = listOf(
+                "music/pong/blip_$templateIndex.wav",
+                "music/pong/blup_$templateIndex.wav",
+                "music/pong/blap_$templateIndex.wav"
+        )
+
+        val tmp = mutableListOf<String>()
+        (0..2).forEach { index ->
+            musicSrcTemplate.forEach { musicPath ->
+                templateIndex = when (index) {
+                    0 -> "d"
+                    1 -> "e"
+                    2 -> "f"
+                    else -> ""
+                }
+                tmp.add(musicPath)
+            }
+        }
+        return tmp.toList()
+    }
+
     private fun resetRound(ballCircle: Circle, isInit: Boolean = false) {
         ball.position.x = ballPosXAtStart
         ball.position.y = ballPosYAtStart
@@ -136,8 +171,10 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
             ball.position.y += ball.speed * sin(ball.angle) * timeSpan.seconds
             ballCircle.x = ball.position.x
             ballCircle.y = ball.position.y
+            channel.volume = 1.2
 
             if (ballCircle.collidesWith(listOf(leftPaddle, rightPaddle))) {
+                sounds[0].play()
                 // TODO: define max speed for ball?
                 ball.speed += ball.speedIncrement
                 ball.angle = PI - ball.angle
@@ -145,6 +182,7 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
 
             val isWallHit = (ballCircle.y < 0) || (ballCircle.y > (sceneView.actualVirtualHeight - 20))
             if (isWallHit) {
+                sounds[1].play()
                 ball.speed += 10
                 ball.angle *= -1
             }
@@ -155,10 +193,12 @@ class PongScene(private val playerPaddle: Paddle, private val computerPaddle: Pa
             if (isLeftPlayerGoal) {
                 resetRound(ballCircle)
                 leftPlayerScore++
+                sounds[2].play(PlaybackTimes.ONE)
                 //scoredYellText.text = "Left SCORED!!!" TODO: figure out when story time
             } else if (isRightPlayerGoal) {
                 resetRound(ballCircle)
                 rightPlayerScore++
+                sounds[2].play(PlaybackTimes.ONE)
                 //scoredYellText.text = "Right SCORED!!!" TODO: figure out when story time
             }
         }

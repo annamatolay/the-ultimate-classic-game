@@ -12,8 +12,7 @@ import com.soywiz.korio.file.std.*
 import utils.*
 
 // TODO: Delete when interactive Dialogs are ready
-class StoryScene(val music: NativeSound) : Scene() {
-    private lateinit var channel: NativeSoundChannel
+class StoryScene(override val music: NativeSound): BaseScene() {
     private var pageIndex = 1
 
     // FIXME-PLUGIN-FYI: when I create the scene with the IntelliJ option, then I get the method like this:
@@ -83,11 +82,6 @@ class StoryScene(val music: NativeSound) : Scene() {
                 }
             }
         }
-        keys { onKeyDown { if (it.key == Key.ESCAPE) sceneContainer.changeToAsync<MainScene>() } }
-    }
-
-    override suspend fun sceneBeforeLeaving() {
-        super.sceneBeforeLeaving()
-        channel.stop()
+        keys { onKeyDown { if (it.key == Key.ESCAPE) sceneContainer.changeToAsync<MenuScene>() } }
     }
 }
